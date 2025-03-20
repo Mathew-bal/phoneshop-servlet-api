@@ -1,4 +1,4 @@
-package com.es.phoneshop.model.product;
+package com.es.phoneshop.locker;
 
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -14,26 +14,26 @@ public class ExtendedReadWriteLock {
 
     private final Lock writeLock;
 
-    public ExtendedReadWriteLock(){
+    public ExtendedReadWriteLock() {
         readWriteLock = new ReentrantReadWriteLock();
         readLock = readWriteLock.readLock();
         writeLock = readWriteLock.writeLock();
     }
 
-    public <T> T readSafe(Supplier<T> readFunction){
+    public <T> T readSafe(Supplier<T> readFunction) {
         readLock.lock();
         try {
             return readFunction.get();
-        }finally {
+        } finally {
             readLock.unlock();
         }
     }
 
-    public <T> void writeSafe(Consumer<T> writeFunction, T writeObject){
+    public <T> void writeSafe(Consumer<T> writeFunction, T writeObject) {
         writeLock.lock();
         try {
             writeFunction.accept(writeObject);
-        }finally {
+        } finally {
             writeLock.unlock();
         }
     }
