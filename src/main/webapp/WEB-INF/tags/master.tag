@@ -1,5 +1,7 @@
 <%@ tag trimDirectiveWhitespaces="true" %>
 <%@ attribute name="pageTitle" required="true" %>
+<%@ attribute name="bodyClass" required="true" %>
+<%@ taglib prefix="tags" tagdir="/WEB-INF/tags" %>
 
 <html>
 <head>
@@ -7,7 +9,7 @@
   <link href='http://fonts.googleapis.com/css?family=Lobster+Two' rel='stylesheet' type='text/css'>
   <link rel="stylesheet" href="${pageContext.servletContext.contextPath}/styles/main.css">
 </head>
-<body class="product-list">
+<body class="${bodyClass}">
   <header>
     <a href="${pageContext.servletContext.contextPath}">
       <img src="${pageContext.servletContext.contextPath}/images/logo.svg"/>
@@ -17,8 +19,6 @@
   <main>
     <jsp:doBody/>
   </main>
-  <p>
-    (c) Expert Soft
-  </p>
 </body>
+<tags:footer/>
 </html>
