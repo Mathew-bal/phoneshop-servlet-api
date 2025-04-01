@@ -1,29 +1,29 @@
 package com.es.phoneshop.web;
 
 import com.es.phoneshop.model.cart.Cart;
-import com.es.phoneshop.model.product.Product;
 import com.es.phoneshop.service.cartservice.DefaultCartService;
-import com.es.phoneshop.service.recentlyviewedservice.DefaultRecentlyViewedService;
+import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletContextEvent;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
-
-import jakarta.servlet.RequestDispatcher;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import org.mockito.stubbing.Answer;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.atomic.AtomicReference;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -33,6 +33,13 @@ import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ProductListPageServletTest {
+
+    private static final long PRODUCT_TEST_ID = 1;
+
+    private static final int PRODUCT_TEST_QUANTITY = 1;
+
+    private static final int PRODUCT_TEST_QUANTITY_INCORRECT = -1;
+
     @Mock
     private HttpServletRequest request;
     @Mock
@@ -52,14 +59,11 @@ public class ProductListPageServletTest {
 
     private ProductListPageServlet servlet = new ProductListPageServlet();
 
-    private List<Product> recentlyViewed;
-
     private Cart cart;
 
     @Before
     public void setup() throws ServletException {
         servlet.init(config);
-        recentlyViewed = new ArrayList<>();
         cart = new Cart();
 
         when(request.getRequestDispatcher(anyString())).thenReturn(requestDispatcher);
@@ -68,7 +72,9 @@ public class ProductListPageServletTest {
 
         when(request.getSession()).thenReturn(session);
         when(session.getAttribute(eq(DefaultCartService.class.getName() + ".cart"))).thenReturn(cart);
-        when(session.getAttribute(eq(DefaultRecentlyViewedService.class.getName() + ".viewed"))).thenReturn(recentlyViewed);
+        when(request.getLocale()).thenReturn(Locale.ENGLISH);
+
+        when(request.getLocale()).thenReturn(Locale.ENGLISH);
 
         demoDataServletContextListener.contextInitialized(servletContextEvent);
     }
@@ -91,5 +97,35 @@ public class ProductListPageServletTest {
 
         verify(requestDispatcher).forward(request, response);
         verify(request, times(0)).setAttribute(eq("products"), anyString());
+    }
+
+    @Test
+    public void testDoPostWithError() throws ServletException, IOException {
+        when(request.getParameter("productAddedId")).thenReturn(String.valueOf(PRODUCT_TEST_ID));
+        when(request.getParameter("quantity")).thenReturn(String.valueOf(PRODUCT_TEST_QUANTITY_INCORRECT));
+
+        AtomicReference<String> errorAttribute = new AtomicReference<>();
+        Mockito.doAnswer((Answer<Void>) invocationOnMock -> {
+            errorAttribute.set(invocationOnMock.getArgument(1));
+            return null;
+        }).when(request).setAttribute(eq("error"), anyString());
+        when(request.getAttribute("error")).then((Answer<String>) invocationOnMock -> errorAttribute.get());
+
+        servlet.doPost(request, response);
+
+        verify(response).sendRedirect(Mockito.argThat(s -> s.contains("error=") && s.contains("addedId=") && s.contains("previousInput")));
+        assertTrue(cart.getCartItems().isEmpty());
+    }
+
+    @Test
+    public void testDoPostCorrectly() throws ServletException, IOException {
+        when(request.getParameter("productAddedId")).thenReturn(String.valueOf(PRODUCT_TEST_ID));
+        when(request.getParameter("quantity")).thenReturn(String.valueOf(PRODUCT_TEST_QUANTITY));
+
+        servlet.doPost(request, response);
+
+        verify(response).sendRedirect(Mockito.argThat(s -> s.contains("message=")));
+        assertEquals(PRODUCT_TEST_QUANTITY, cart.getCartItems().get(0).getQuantity());
+        assertEquals(PRODUCT_TEST_ID, cart.getCartItems().get(0).getProduct().getId().longValue());
     }
 }

@@ -1,7 +1,7 @@
 package com.es.phoneshop.web;
 
-import com.es.phoneshop.dao.ArrayListProductDao;
-import com.es.phoneshop.dao.ProductDao;
+import com.es.phoneshop.model.cart.Cart;
+import com.es.phoneshop.service.cartservice.DefaultCartService;
 import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletContext;
@@ -9,6 +9,7 @@ import jakarta.servlet.ServletContextEvent;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -23,7 +24,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class ProductPriceHistoryServletTest {
+public class MiniCartServletTest {
     @Mock
     private HttpServletRequest request;
     @Mock
@@ -36,34 +37,35 @@ public class ProductPriceHistoryServletTest {
     private ServletContext servletContext;
     @Mock
     ServletContextEvent servletContextEvent;
+    @Mock
+    HttpSession session;
 
     private DemoDataServletContextListener demoDataServletContextListener = new DemoDataServletContextListener();
 
-    private ProductPriceHistoryPageServlet servlet = new ProductPriceHistoryPageServlet();
+    private MiniCartServlet servlet = new MiniCartServlet();
 
-    private ProductDao productDao;
-
-    private static final long PRODUCT_TEST_ID = 3;
+    private Cart cart;
 
     @Before
     public void setup() throws ServletException {
         servlet.init(config);
+        cart = new Cart();
 
         when(request.getRequestDispatcher(anyString())).thenReturn(requestDispatcher);
-        when(request.getPathInfo()).thenReturn("/" + PRODUCT_TEST_ID);
 
         when(servletContext.getInitParameter("insertDemoData")).thenReturn("true");
         when(servletContextEvent.getServletContext()).thenReturn(servletContext);
         demoDataServletContextListener.contextInitialized(servletContextEvent);
 
-        productDao = ArrayListProductDao.getInstance();
+        when(request.getSession()).thenReturn(session);
+        when(session.getAttribute(eq(DefaultCartService.class.getName() + ".cart"))).thenReturn(cart);
     }
 
     @Test
     public void testDoGet() throws ServletException, IOException {
         servlet.doGet(request, response);
 
-        verify(requestDispatcher).forward(request, response);
-        verify(request).setAttribute(eq("product"), eq(productDao.getProduct(PRODUCT_TEST_ID)));
+        verify(requestDispatcher).include(request, response);
+        verify(request).setAttribute(eq("cart"), eq(cart));
     }
 }

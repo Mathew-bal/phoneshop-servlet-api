@@ -1,14 +1,16 @@
 package com.es.phoneshop.web;
 
-import com.es.phoneshop.dao.ArrayListProductDao;
-import com.es.phoneshop.dao.ProductDao;
-import jakarta.servlet.RequestDispatcher;
+import com.es.phoneshop.exception.OutOfStockException;
+import com.es.phoneshop.model.cart.Cart;
+import com.es.phoneshop.service.cartservice.CartService;
+import com.es.phoneshop.service.cartservice.DefaultCartService;
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletContextEvent;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -17,53 +19,62 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import java.io.IOException;
 
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class ProductPriceHistoryServletTest {
+public class DeleteCartItemServletTest {
+
+    private static final long PRODUCT_TEST_ID = 1;
+
+    private static final int PRODUCT_TEST_QUANTITY = 1;
+
     @Mock
     private HttpServletRequest request;
     @Mock
     private HttpServletResponse response;
-    @Mock
-    private RequestDispatcher requestDispatcher;
     @Mock
     private ServletConfig config;
     @Mock
     private ServletContext servletContext;
     @Mock
     ServletContextEvent servletContextEvent;
+    @Mock
+    HttpSession session;
 
     private DemoDataServletContextListener demoDataServletContextListener = new DemoDataServletContextListener();
 
-    private ProductPriceHistoryPageServlet servlet = new ProductPriceHistoryPageServlet();
+    private DeleteCartItemServlet servlet = new DeleteCartItemServlet();
+    private Cart cart;
 
-    private ProductDao productDao;
-
-    private static final long PRODUCT_TEST_ID = 3;
+    private CartService cartService;
 
     @Before
     public void setup() throws ServletException {
         servlet.init(config);
+        cartService = DefaultCartService.getInstance();
+        cart = new Cart();
 
-        when(request.getRequestDispatcher(anyString())).thenReturn(requestDispatcher);
         when(request.getPathInfo()).thenReturn("/" + PRODUCT_TEST_ID);
 
         when(servletContext.getInitParameter("insertDemoData")).thenReturn("true");
         when(servletContextEvent.getServletContext()).thenReturn(servletContext);
         demoDataServletContextListener.contextInitialized(servletContextEvent);
 
-        productDao = ArrayListProductDao.getInstance();
+        when(request.getSession()).thenReturn(session);
+        when(session.getAttribute(eq(DefaultCartService.class.getName() + ".cart"))).thenReturn(cart);
     }
 
     @Test
-    public void testDoGet() throws ServletException, IOException {
-        servlet.doGet(request, response);
+    public void testDoGet() throws ServletException, IOException, OutOfStockException {
+        cartService.add(session, PRODUCT_TEST_ID, PRODUCT_TEST_QUANTITY);
 
-        verify(requestDispatcher).forward(request, response);
-        verify(request).setAttribute(eq("product"), eq(productDao.getProduct(PRODUCT_TEST_ID)));
+        servlet.doPost(request, response);
+
+        verify(response).sendRedirect(any());
+        assertTrue(cart.getCartItems().isEmpty());
     }
 }
