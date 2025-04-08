@@ -21,7 +21,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
@@ -85,5 +84,44 @@ public class DefaultCartServiceTest {
         System.out.println(sessionCart);
         cartService.add(session, PRODUCT_TEST_ID, TEST_QUANTITY_OVER_STOCK);
         System.out.println(sessionCart);
+    }
+
+    @Test
+    public void testUpdateCart() throws OutOfStockException {
+        cartService.add(session, PRODUCT_TEST_ID, TEST_QUANTITY);
+        cartService.update(session, PRODUCT_TEST_ID, TEST_QUANTITY + TEST_QUANTITY_ADD);
+
+        assertFalse(sessionCart.getCartItems().isEmpty());
+        assertEquals(TEST_QUANTITY + TEST_QUANTITY_ADD, sessionCart.getCartItems().get(0).getQuantity());
+    }
+
+    @Test(expected = OutOfStockException.class)
+    public void testUpdateOverStock() throws OutOfStockException {
+        cartService.add(session, PRODUCT_TEST_ID, TEST_QUANTITY);
+        cartService.update(session, PRODUCT_TEST_ID, TEST_QUANTITY_OVER_STOCK);
+    }
+
+    @Test
+    public void testGetCartItem() throws OutOfStockException {
+        cartService.add(session, PRODUCT_TEST_ID, TEST_QUANTITY);
+
+        assertTrue(cartService.getCartItem(session, PRODUCT_TEST_ID).isPresent());
+        assertTrue(cartService.getCartItem(session, PRODUCT_TEST_ID + 1).isEmpty());
+    }
+
+    @Test
+    public void testDeleteCartItem() throws OutOfStockException {
+        cartService.add(session, PRODUCT_TEST_ID, TEST_QUANTITY);
+        cartService.delete(session, PRODUCT_TEST_ID);
+
+        assertTrue(cartService.getCartItem(session, PRODUCT_TEST_ID).isEmpty());
+    }
+
+    @Test
+    public void testDeleteCartItemOnZeroQuantity() throws OutOfStockException {
+        cartService.add(session, PRODUCT_TEST_ID, TEST_QUANTITY);
+        cartService.update(session, PRODUCT_TEST_ID, 0);
+
+        assertTrue(cartService.getCartItem(session, PRODUCT_TEST_ID).isEmpty());
     }
 }

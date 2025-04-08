@@ -127,3 +127,10 @@ body.product-list {
 .error {
     color: red;
 }
+
+
+.success {
+    color: green;
+    padding: 4px;
+}
+

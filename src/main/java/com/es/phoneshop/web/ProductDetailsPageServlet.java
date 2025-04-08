@@ -38,10 +38,7 @@ public class ProductDetailsPageServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         request.setAttribute("product", productDao.getProduct(getProductId(request)));
-        request.setAttribute("recentlyViewedProducts", recentlyViewedService.getRecentlyViewedProducts(request.getSession()));
         request.setAttribute("alreadyInCartQuantity", cartService.getProductQuantity(request.getSession(), getProductId(request)));
-        request.setAttribute("cart", cartService.getCart(request.getSession()));
-        request.setAttribute("cartPrice", cartService.getCartPrice(request.getSession()));
         request.setAttribute("error", request.getParameter("error"));
         request.setAttribute("previousInput", request.getParameter("previousInput"));
         request.getRequestDispatcher("/WEB-INF/pages/product.jsp").forward(request, response);
@@ -52,17 +49,14 @@ public class ProductDetailsPageServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String quantityString = request.getParameter("quantity");
         Long productId = getProductId(request);
+        int quantity = parseProductQuantity(request, quantityString);
 
         try {
-            NumberFormat numberFormat = NumberFormat.getInstance(request.getLocale());
-            int quantity = numberFormat.parse(quantityString).intValue();
             if (quantity > 0) {
                 cartService.add(request.getSession(), productId, quantity);
             } else {
                 request.setAttribute("error", "Not a valid number");
             }
-        } catch (ParseException parseException) {
-            request.setAttribute("error", "Not a number");
         } catch (OutOfStockException outOfStockException) {
             request.setAttribute("error", "Out of stock, only available: " + outOfStockException.getStockAvailable());
         }
@@ -71,6 +65,16 @@ public class ProductDetailsPageServlet extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/products/" + productId + "?message=Product added to cart");
         } else {
             response.sendRedirect(request.getContextPath() + "/products/" + productId + "?error=" + request.getAttribute("error") + "&previousInput=" + quantityString);
+        }
+    }
+
+
+    private int parseProductQuantity(HttpServletRequest request, String quantityString) {
+        try {
+            NumberFormat numberFormat = NumberFormat.getInstance(request.getLocale());
+            return numberFormat.parse(quantityString).intValue();
+        } catch (ParseException parseException) {
+            return -1;
         }
     }
 
