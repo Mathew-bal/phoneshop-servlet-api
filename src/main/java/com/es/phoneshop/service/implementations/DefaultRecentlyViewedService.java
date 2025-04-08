@@ -1,19 +1,13 @@
-package com.es.phoneshop.service.recentlyviewedservice;
+package com.es.phoneshop.service.implementations;
 
-import com.es.phoneshop.dao.ArrayListProductDao;
+import com.es.phoneshop.dao.implementations.ArrayListProductDao;
 import com.es.phoneshop.dao.ProductDao;
-import com.es.phoneshop.exception.OutOfStockException;
-import com.es.phoneshop.model.cart.Cart;
-import com.es.phoneshop.model.cartitem.CartItem;
 import com.es.phoneshop.model.product.Product;
-import com.es.phoneshop.service.cartservice.CartService;
+import com.es.phoneshop.service.RecentlyViewedService;
 import jakarta.servlet.http.HttpSession;
 
-import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Deque;
 import java.util.List;
-import java.util.Optional;
 
 public class DefaultRecentlyViewedService implements RecentlyViewedService {
 
@@ -49,7 +43,7 @@ public class DefaultRecentlyViewedService implements RecentlyViewedService {
     @Override
     public void addRecentlyViewedProduct(HttpSession session, Long productId) {
         List<Product> recentlyViewedProducts = getRecentlyViewedProducts(session);
-        Product product = productDao.getProduct(productId);
+        Product product = productDao.get(productId);
 
         synchronized (recentlyViewedProducts) {
             recentlyViewedProducts.stream().

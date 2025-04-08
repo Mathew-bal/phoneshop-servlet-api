@@ -1,4 +1,4 @@
-package com.es.phoneshop.comparator;
+package com.es.phoneshop.utils.comparators;
 
 import com.es.phoneshop.enums.SortBy;
 import com.es.phoneshop.enums.SortOrder;

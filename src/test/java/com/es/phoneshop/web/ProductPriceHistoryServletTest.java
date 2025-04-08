@@ -1,6 +1,6 @@
 package com.es.phoneshop.web;
 
-import com.es.phoneshop.dao.ArrayListProductDao;
+import com.es.phoneshop.dao.implementations.ArrayListProductDao;
 import com.es.phoneshop.dao.ProductDao;
 import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.ServletConfig;
@@ -64,6 +64,6 @@ public class ProductPriceHistoryServletTest {
         servlet.doGet(request, response);
 
         verify(requestDispatcher).forward(request, response);
-        verify(request).setAttribute(eq("product"), eq(productDao.getProduct(PRODUCT_TEST_ID)));
+        verify(request).setAttribute(eq("product"), eq(productDao.get(PRODUCT_TEST_ID)));
     }
 }
