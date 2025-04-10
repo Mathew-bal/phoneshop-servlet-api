@@ -1,12 +1,11 @@
-package com.es.phoneshop.service;
+package com.es.phoneshop.service.implementations;
 
-import com.es.phoneshop.dao.ArrayListProductDao;
+import com.es.phoneshop.dao.implementations.ArrayListProductDao;
 import com.es.phoneshop.dao.ProductDao;
 import com.es.phoneshop.exception.OutOfStockException;
 import com.es.phoneshop.model.cart.Cart;
 import com.es.phoneshop.model.product.Product;
-import com.es.phoneshop.service.cartservice.CartService;
-import com.es.phoneshop.service.cartservice.DefaultCartService;
+import com.es.phoneshop.service.CartService;
 import jakarta.servlet.http.HttpSession;
 import org.junit.Before;
 import org.junit.Test;
@@ -15,13 +14,16 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import java.math.BigDecimal;
+import java.util.concurrent.atomic.AtomicBoolean;
 
-import static com.es.phoneshop.dao.ArrayListProductDao.USD_CURRENCY;
+import static com.es.phoneshop.dao.implementations.ArrayListProductDao.USD_CURRENCY;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -29,7 +31,11 @@ public class DefaultCartServiceTest {
 
     private static final long PRODUCT_TEST_ID = 3;
 
+    private static final long PRODUCT_TEST_ID_2 = 1;
+
     private static final int TEST_QUANTITY = 3;
+
+    private static final int TEST_QUANTITY_2 = 1;
 
     private static final int TEST_QUANTITY_ADD = 1;
 
@@ -70,6 +76,17 @@ public class DefaultCartServiceTest {
     }
 
     @Test
+    public void testCartSummary() throws OutOfStockException {
+        cartService.add(session, PRODUCT_TEST_ID, TEST_QUANTITY);
+        cartService.add(session, PRODUCT_TEST_ID_2, TEST_QUANTITY_2);
+
+        assertEquals(TEST_QUANTITY + TEST_QUANTITY_2, cartService.getCart(session).getTotalQuantity());
+        assertEquals( productDao.get(PRODUCT_TEST_ID).getPrice().multiply(new BigDecimal(TEST_QUANTITY))
+                        .add(productDao.get(PRODUCT_TEST_ID_2).getPrice().multiply(new BigDecimal(TEST_QUANTITY_2))),
+                cartService.getCart(session).getTotalPrice());
+    }
+
+    @Test
     public void testAddTheSameToCart() throws OutOfStockException {
         cartService.add(session, PRODUCT_TEST_ID, TEST_QUANTITY);
         cartService.add(session, PRODUCT_TEST_ID, TEST_QUANTITY_ADD);
@@ -81,9 +98,7 @@ public class DefaultCartServiceTest {
     @Test(expected = OutOfStockException.class)
     public void testAddOverStock() throws OutOfStockException {
         cartService.add(session, PRODUCT_TEST_ID, TEST_QUANTITY);
-        System.out.println(sessionCart);
         cartService.add(session, PRODUCT_TEST_ID, TEST_QUANTITY_OVER_STOCK);
-        System.out.println(sessionCart);
     }
 
     @Test
@@ -123,5 +138,23 @@ public class DefaultCartServiceTest {
         cartService.update(session, PRODUCT_TEST_ID, 0);
 
         assertTrue(cartService.getCartItem(session, PRODUCT_TEST_ID).isEmpty());
+    }
+
+    @Test
+    public void testClearCart() throws OutOfStockException {
+        cartService.add(session, PRODUCT_TEST_ID, TEST_QUANTITY);
+        cartService.add(session, PRODUCT_TEST_ID_2, TEST_QUANTITY_2);
+        AtomicBoolean sessionReset = new AtomicBoolean(false);
+
+        doAnswer(invocationOnMock -> {
+            if (invocationOnMock.getArgument(1) == null) {
+                sessionReset.set(true);
+            }
+            return null;
+        }).when(session).setAttribute(eq(DefaultCartService.class.getName() + ".cart"), any());
+
+        cartService.clearCart(session);
+
+        assertTrue(sessionReset.get());
     }
 }

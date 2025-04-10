@@ -1,8 +1,10 @@
 package com.es.phoneshop.dao;
 
-import com.es.phoneshop.exception.ProductNotFoundException;
+import com.es.phoneshop.dao.implementations.ArrayListGenericDao;
+import com.es.phoneshop.dao.implementations.ArrayListProductDao;
 import com.es.phoneshop.enums.SortBy;
 import com.es.phoneshop.enums.SortOrder;
+import com.es.phoneshop.exception.ProductNotFoundException;
 import com.es.phoneshop.model.product.Product;
 import org.junit.Before;
 import org.junit.Test;
@@ -14,8 +16,8 @@ import java.util.Currency;
 import java.util.Iterator;
 import java.util.List;
 
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 
@@ -26,10 +28,16 @@ public class ArrayListProductDaoTest {
 
     private static final Currency USD_CURRENCY = Currency.getInstance(CURRENCY);
 
+    private List<Product> products;
+
     @Before
-    public void setup() {
+    public void setup() throws NoSuchFieldException, IllegalAccessException {
         resetProductDao();
         productDao = ArrayListProductDao.getInstance();
+        Field field = ArrayListGenericDao.class.getDeclaredField("items");
+        field.setAccessible(true);
+        products = (List<Product>) field.get(productDao);
+        field.setAccessible(false);
     }
 
     private void saveSampleProducts() {
@@ -68,19 +76,25 @@ public class ArrayListProductDaoTest {
     }
 
     @Test
+    public void testGetProduct() {
+        assertEquals("sgs", productDao.get(1L).getCode());
+    }
+
+    @Test(expected = ProductNotFoundException.class)
+    public void testGetNonExistingProduct() {
+        long productsCount = products.size();
+
+        productDao.get(productsCount + 2);
+    }
+
+    @Test
     public void testSaveProduct() {
         Product testproduct = new Product("testproduct", "Samsung Galaxy S", new BigDecimal(100), USD_CURRENCY, 100, "https://raw.githubusercontent.com/andrewosipenko/phoneshop-ext-images/master/manufacturer/Samsung/Samsung%20Galaxy%20S.jpg");
 
         productDao.save(testproduct);
 
-        assertEquals("testproduct", productDao.getProduct(testproduct.getId()).getCode());
-    }
-
-    @Test(expected = ProductNotFoundException.class)
-    public void testGetNonExistingProduct() {
-        long productsCount = productDao.filterProducts().size();
-
-        productDao.getProduct(productsCount + 2);
+        assertTrue(products.stream().
+                anyMatch(product -> product.getCode().equals("testproduct")));
     }
 
     @Test(expected = ProductNotFoundException.class)
@@ -90,7 +104,9 @@ public class ArrayListProductDaoTest {
 
         productDao.delete(testproduct.getId());
 
-        productDao.getProduct(testproduct.getId());
+        assertFalse(products.stream().
+                anyMatch(product -> product.getCode().equals("testproduct")));
+        productDao.get(testproduct.getId());
     }
 
     @Test
@@ -111,7 +127,7 @@ public class ArrayListProductDaoTest {
     public void testTextSearchContainsAllMatching() {
         String searchQuery = "Samsung";
         List<Product> searchResults = productDao.findProducts(searchQuery, SortBy.DESCRIPTION, SortOrder.ASC);
-        List<Product> allExpectedProducts = List.of(productDao.getProduct(1L), productDao.getProduct(3L));
+        List<Product> allExpectedProducts = List.of(productDao.get(1L), productDao.get(3L));
 
         assertTrue(searchResults.containsAll(allExpectedProducts));
     }
@@ -121,7 +137,7 @@ public class ArrayListProductDaoTest {
         String searchQuery = "Samsung";
         List<Product> searchResults = productDao.findProducts(searchQuery, SortBy.DESCRIPTION, SortOrder.ASC);
 
-        assertFalse(searchResults.contains(productDao.getProduct(2L)));
+        assertFalse(searchResults.contains(productDao.get(2L)));
     }
 
     @Test

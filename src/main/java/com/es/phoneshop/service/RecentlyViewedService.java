@@ -1,4 +1,4 @@
-package com.es.phoneshop.service.recentlyviewedservice;
+package com.es.phoneshop.service;
 
 import com.es.phoneshop.model.product.Product;
 import jakarta.servlet.http.HttpSession;

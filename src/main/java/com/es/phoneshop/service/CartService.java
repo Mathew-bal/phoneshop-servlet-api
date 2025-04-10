@@ -1,12 +1,10 @@
-package com.es.phoneshop.service.cartservice;
+package com.es.phoneshop.service;
 
 import com.es.phoneshop.exception.OutOfStockException;
 import com.es.phoneshop.model.cart.Cart;
 import com.es.phoneshop.model.cartitem.CartItem;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 
-import java.math.BigDecimal;
 import java.util.Optional;
 
 public interface CartService {
@@ -16,4 +14,5 @@ public interface CartService {
     void update(HttpSession session, Long productId, int quantity) throws OutOfStockException;
     void delete(HttpSession session, Long productId);
     int getProductQuantity(HttpSession session, Long productId);
+    void clearCart(HttpSession session);
 }

@@ -1,10 +1,11 @@
-package com.es.phoneshop.comparator;
+package com.es.phoneshop.utils.comparator;
 
 import com.es.phoneshop.enums.SortBy;
 import com.es.phoneshop.enums.SortOrder;
 import com.es.phoneshop.model.product.Product;
 import com.es.phoneshop.querymatcher.DescriptionQueryMatcher;
 import com.es.phoneshop.querymatcher.QueryMatcher;
+import com.es.phoneshop.utils.comparators.ProductComparator;
 import org.junit.Test;
 
 import java.math.BigDecimal;

@@ -1,10 +1,10 @@
-package com.es.phoneshop.dao;
+package com.es.phoneshop.dao.implementations;
 
-import com.es.phoneshop.comparator.ProductComparator;
+import com.es.phoneshop.utils.comparators.ProductComparator;
+import com.es.phoneshop.dao.ProductDao;
 import com.es.phoneshop.enums.SortBy;
 import com.es.phoneshop.enums.SortOrder;
 import com.es.phoneshop.exception.ProductNotFoundException;
-import com.es.phoneshop.locker.ExtendedReadWriteLock;
 import com.es.phoneshop.model.product.Product;
 import com.es.phoneshop.querymatcher.DescriptionQueryMatcher;
 import com.es.phoneshop.querymatcher.QueryMatcher;
@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public class ArrayListProductDao implements ProductDao {
+public class ArrayListProductDao extends ArrayListGenericDao<Product> implements ProductDao {
 
     private static final String CURRENCY = "USD";
 
@@ -33,23 +33,8 @@ public class ArrayListProductDao implements ProductDao {
         return instance;
     }
 
-    private List<Product> products;
-
-    private long maxId = 1;
-
-    private ExtendedReadWriteLock extendedReadWriteLock;
-
     private ArrayListProductDao() {
-        extendedReadWriteLock = new ExtendedReadWriteLock();
-
-        products = new ArrayList<>();
-    }
-
-    @Override
-    public Product getProduct(Long id) {
-        return extendedReadWriteLock.readSafe(() -> products.stream().
-                filter(product -> id.equals(product.getId())).
-                findAny().orElseThrow(ProductNotFoundException::new));
+        super(ProductNotFoundException::new);
     }
 
     private boolean filterHasPriceHasStock(Product product) {
@@ -59,7 +44,7 @@ public class ArrayListProductDao implements ProductDao {
     @Override
     public List<Product> findProducts() {
         return extendedReadWriteLock.readSafe(() -> {
-            return new ArrayList<>(products);
+            return new ArrayList<>(items);
         });
     }
 
@@ -70,7 +55,7 @@ public class ArrayListProductDao implements ProductDao {
         Comparator<Product> sortComparator = new ProductComparator(keyWords, sortBy, sortOrder, queryMatcher);
 
         return extendedReadWriteLock.readSafe(() -> {
-            return products.stream().
+            return items.stream().
                     filter(this::filterHasPriceHasStock).
                     filter(product -> Optional.ofNullable(searchQuery).orElse("").isBlank() || queryMatcher.calculateMatchValue(product, keyWords) > 0).
                     sorted(sortComparator).
@@ -81,34 +66,9 @@ public class ArrayListProductDao implements ProductDao {
     @Override
     public List<Product> filterProducts() {
         return extendedReadWriteLock.readSafe(() -> {
-            return products.stream().
+            return items.stream().
                     filter(this::filterHasPriceHasStock).
                     collect(Collectors.toList());
         });
-    }
-
-    @Override
-    public void save(Product product) {
-        extendedReadWriteLock.writeSafe((saveProduct) -> {
-            if (saveProduct.getId() == null) {
-                saveProduct.setId(maxId++);
-                products.add(saveProduct);
-            } else {
-                products = products.stream().map((oldProduct) ->
-                {
-                    if (saveProduct.getId().equals(oldProduct.getId()))
-                        return saveProduct;
-                    else
-                        return oldProduct;
-                }).collect(Collectors.toList());
-            }
-        }, product);
-    }
-
-    @Override
-    public void delete(Long id) throws ProductNotFoundException {
-        extendedReadWriteLock.writeSafe((deleteId) -> {
-            products.removeIf(product -> deleteId.equals(product.getId()));
-        }, id);
     }
 }

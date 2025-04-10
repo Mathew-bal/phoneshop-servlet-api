@@ -1,7 +1,7 @@
 package com.es.phoneshop.web;
 
 import com.es.phoneshop.model.product.Product;
-import com.es.phoneshop.service.recentlyviewedservice.DefaultRecentlyViewedService;
+import com.es.phoneshop.service.implementations.DefaultRecentlyViewedService;
 import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletContext;

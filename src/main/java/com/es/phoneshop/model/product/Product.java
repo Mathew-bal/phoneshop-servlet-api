@@ -1,5 +1,6 @@
 package com.es.phoneshop.model.product;
 
+import com.es.phoneshop.model.baseentity.BaseEntity;
 import com.es.phoneshop.model.pricechange.PriceChange;
 
 import java.io.Serializable;
@@ -9,8 +10,7 @@ import java.util.Currency;
 import java.util.Date;
 import java.util.List;
 
-public class Product implements Serializable {
-    private Long id;
+public class Product extends BaseEntity<Long> implements Serializable {
     private String code;
     private String description;
     /**
@@ -51,14 +51,6 @@ public class Product implements Serializable {
 
     public Product(String code, String description, BigDecimal price, Currency currency, int stock, String imageUrl, List<PriceChange> priceChanges) {
         this(null, code, description, price, currency, stock, imageUrl, priceChanges);
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
     }
 
     public String getCode() {

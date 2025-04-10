@@ -1,12 +1,12 @@
 package com.es.phoneshop.web;
 
-import com.es.phoneshop.dao.ArrayListProductDao;
+import com.es.phoneshop.dao.implementations.ArrayListProductDao;
 import com.es.phoneshop.dao.ProductDao;
 import com.es.phoneshop.exception.OutOfStockException;
-import com.es.phoneshop.service.cartservice.CartService;
-import com.es.phoneshop.service.cartservice.DefaultCartService;
-import com.es.phoneshop.service.recentlyviewedservice.DefaultRecentlyViewedService;
-import com.es.phoneshop.service.recentlyviewedservice.RecentlyViewedService;
+import com.es.phoneshop.service.CartService;
+import com.es.phoneshop.service.implementations.DefaultCartService;
+import com.es.phoneshop.service.implementations.DefaultRecentlyViewedService;
+import com.es.phoneshop.service.RecentlyViewedService;
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
@@ -37,7 +37,7 @@ public class ProductDetailsPageServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        request.setAttribute("product", productDao.getProduct(getProductId(request)));
+        request.setAttribute("product", productDao.get(getProductId(request)));
         request.setAttribute("alreadyInCartQuantity", cartService.getProductQuantity(request.getSession(), getProductId(request)));
         request.setAttribute("error", request.getParameter("error"));
         request.setAttribute("previousInput", request.getParameter("previousInput"));

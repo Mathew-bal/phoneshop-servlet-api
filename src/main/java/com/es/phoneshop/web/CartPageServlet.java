@@ -1,8 +1,8 @@
 package com.es.phoneshop.web;
 
 import com.es.phoneshop.exception.OutOfStockException;
-import com.es.phoneshop.service.cartservice.CartService;
-import com.es.phoneshop.service.cartservice.DefaultCartService;
+import com.es.phoneshop.service.CartService;
+import com.es.phoneshop.service.implementations.DefaultCartService;
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
@@ -82,9 +82,5 @@ public class CartPageServlet extends HttpServlet {
         } catch (ParseException parseException) {
             return -1;
         }
-    }
-
-    private static long getProductId(HttpServletRequest request) {
-        return Long.parseLong(request.getPathInfo().substring(ID_SUBSTRING_PREFIX_LENGTH));
     }
 }

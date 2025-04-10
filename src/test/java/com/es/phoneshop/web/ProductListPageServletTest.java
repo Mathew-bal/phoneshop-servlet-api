@@ -1,7 +1,7 @@
 package com.es.phoneshop.web;
 
 import com.es.phoneshop.model.cart.Cart;
-import com.es.phoneshop.service.cartservice.DefaultCartService;
+import com.es.phoneshop.service.implementations.DefaultCartService;
 import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletContext;
@@ -100,7 +100,7 @@ public class ProductListPageServletTest {
     }
 
     @Test
-    public void testDoPostWithError() throws ServletException, IOException {
+    public void testDoPostWithError() throws IOException {
         when(request.getParameter("productAddedId")).thenReturn(String.valueOf(PRODUCT_TEST_ID));
         when(request.getParameter("quantity")).thenReturn(String.valueOf(PRODUCT_TEST_QUANTITY_INCORRECT));
 
@@ -118,7 +118,7 @@ public class ProductListPageServletTest {
     }
 
     @Test
-    public void testDoPostCorrectly() throws ServletException, IOException {
+    public void testDoPostCorrectly() throws IOException {
         when(request.getParameter("productAddedId")).thenReturn(String.valueOf(PRODUCT_TEST_ID));
         when(request.getParameter("quantity")).thenReturn(String.valueOf(PRODUCT_TEST_QUANTITY));
 

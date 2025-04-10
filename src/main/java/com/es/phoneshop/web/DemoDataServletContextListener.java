@@ -1,6 +1,6 @@
 package com.es.phoneshop.web;
 
-import com.es.phoneshop.dao.ArrayListProductDao;
+import com.es.phoneshop.dao.implementations.ArrayListProductDao;
 import com.es.phoneshop.model.product.Product;
 import com.es.phoneshop.dao.ProductDao;
 import jakarta.servlet.ServletContextEvent;
@@ -10,7 +10,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.es.phoneshop.dao.ArrayListProductDao.USD_CURRENCY;
+import static com.es.phoneshop.dao.implementations.ArrayListProductDao.USD_CURRENCY;
 
 public class DemoDataServletContextListener implements ServletContextListener {
 

@@ -1,11 +1,12 @@
-package com.es.phoneshop.service.cartservice;
+package com.es.phoneshop.service.implementations;
 
-import com.es.phoneshop.dao.ArrayListProductDao;
+import com.es.phoneshop.dao.implementations.ArrayListProductDao;
 import com.es.phoneshop.dao.ProductDao;
 import com.es.phoneshop.exception.OutOfStockException;
 import com.es.phoneshop.model.cart.Cart;
 import com.es.phoneshop.model.cartitem.CartItem;
 import com.es.phoneshop.model.product.Product;
+import com.es.phoneshop.service.CartService;
 import jakarta.servlet.http.HttpSession;
 
 import java.math.BigDecimal;
@@ -52,7 +53,7 @@ public class DefaultCartService implements CartService {
 
     public void updateProductQuantity(HttpSession session, Long productId, int quantity) throws OutOfStockException {
         Cart cart = getCart(session);
-        Product product = productDao.getProduct(productId);
+        Product product = productDao.get(productId);
         Optional<CartItem> cartItem = getCartItem(session, productId);
         int previousQuantity = cartItem.map(CartItem::getQuantity).orElse(0);
 
@@ -93,6 +94,11 @@ public class DefaultCartService implements CartService {
             return getCartItem(session, productId).
                     map(CartItem::getQuantity).orElse(0);
         }
+    }
+
+    @Override
+    public void clearCart(HttpSession session) {
+        session.setAttribute(CART_SESSION_ATTRIBUTE, null);
     }
 
     private void recalculateCart(HttpSession session) {

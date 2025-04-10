@@ -1,14 +1,9 @@
-package com.es.phoneshop.service;
+package com.es.phoneshop.service.implementations;
 
-import com.es.phoneshop.dao.ArrayListProductDao;
+import com.es.phoneshop.dao.implementations.ArrayListProductDao;
 import com.es.phoneshop.dao.ProductDao;
-import com.es.phoneshop.exception.OutOfStockException;
-import com.es.phoneshop.model.cart.Cart;
 import com.es.phoneshop.model.product.Product;
-import com.es.phoneshop.service.cartservice.CartService;
-import com.es.phoneshop.service.cartservice.DefaultCartService;
-import com.es.phoneshop.service.recentlyviewedservice.DefaultRecentlyViewedService;
-import com.es.phoneshop.service.recentlyviewedservice.RecentlyViewedService;
+import com.es.phoneshop.service.RecentlyViewedService;
 import jakarta.servlet.http.HttpSession;
 import org.junit.Before;
 import org.junit.Test;
@@ -20,7 +15,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.es.phoneshop.dao.ArrayListProductDao.USD_CURRENCY;
+import static com.es.phoneshop.dao.implementations.ArrayListProductDao.USD_CURRENCY;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
