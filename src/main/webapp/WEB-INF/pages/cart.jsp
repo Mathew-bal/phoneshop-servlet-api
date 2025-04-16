@@ -3,7 +3,7 @@
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib prefix="tags" tagdir="/WEB-INF/tags" %>
 
-<tags:master pageTitle="Price history" bodyClass="cart">
+<tags:master pageTitle="Cart" bodyClass="cart">
 <c:if test="${not empty cart}">
   <p>
     Cart: <fmt:formatNumber value="${cart.totalPrice}" type="currency" currencySymbol="${cart.cartItems[0].product.currency.symbol}"/>
@@ -50,7 +50,7 @@
               <fmt:formatNumber value="${item.quantity}" var="quantity"/>
               <c:set var="error" value="${errors[item.product.id]}" />
               <c:set var="message" value="${messages[item.product.id]}" />
-              <input name="quantity" value="${not empty error ? paramValues['quantity'][status.index] : item.quantity}"">
+              <input name="quantity" value="${not empty error ? paramValues['quantity'][status.index] : item.quantity}">
               <input type="hidden" name="productId" value="${item.product.id}" >
               <c:if test="${not empty error}">
                 <div class="error">
@@ -76,7 +76,10 @@
     </table>
     <p>
       <button>Update</button>
-    </p>
+     </p>
+    </form>
+    <form action="${pageContext.servletContext.contextPath}/checkout" method="GET">
+       <button>Checkout</button>
     </form>
     <form id="deleteCartItem" method="post">
     </form>

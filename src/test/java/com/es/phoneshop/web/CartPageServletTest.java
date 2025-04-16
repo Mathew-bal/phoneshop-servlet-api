@@ -1,10 +1,10 @@
 package com.es.phoneshop.web;
 
-import com.es.phoneshop.dao.ArrayListProductDao;
+import com.es.phoneshop.dao.implementations.ArrayListProductDao;
 import com.es.phoneshop.dao.ProductDao;
 import com.es.phoneshop.model.cart.Cart;
 import com.es.phoneshop.model.cartitem.CartItem;
-import com.es.phoneshop.service.cartservice.DefaultCartService;
+import com.es.phoneshop.service.implementations.DefaultCartService;
 import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletContext;
@@ -85,8 +85,8 @@ public class CartPageServletTest {
         when(request.getLocale()).thenReturn(Locale.ENGLISH);
 
         productDao = ArrayListProductDao.getInstance();
-        cart.getCartItems().add(new CartItem(productDao.getProduct(PRODUCT_TEST_ID_1), PRODUCT_TEST_QUANTITY_DEFAULT));
-        cart.getCartItems().add(new CartItem(productDao.getProduct(PRODUCT_TEST_ID_2), PRODUCT_TEST_QUANTITY_DEFAULT));
+        cart.getCartItems().add(new CartItem(productDao.get(PRODUCT_TEST_ID_1), PRODUCT_TEST_QUANTITY_DEFAULT));
+        cart.getCartItems().add(new CartItem(productDao.get(PRODUCT_TEST_ID_2), PRODUCT_TEST_QUANTITY_DEFAULT));
     }
 
     @Test

@@ -20,7 +20,7 @@
     </a>
   </header>
 
-<c:if test="${bodyClass ne 'cart'}">
+<c:if test="${bodyClass ne 'cart' and bodyClass ne 'checkout'}">
   <jsp:include page="/cart/minicart"/>
 </c:if>
   <main>

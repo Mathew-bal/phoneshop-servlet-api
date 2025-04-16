@@ -1,11 +1,11 @@
 package com.es.phoneshop.web;
 
-import com.es.phoneshop.dao.ArrayListProductDao;
+import com.es.phoneshop.dao.implementations.ArrayListProductDao;
 import com.es.phoneshop.dao.ProductDao;
 import com.es.phoneshop.model.cart.Cart;
 import com.es.phoneshop.model.product.Product;
-import com.es.phoneshop.service.cartservice.DefaultCartService;
-import com.es.phoneshop.service.recentlyviewedservice.DefaultRecentlyViewedService;
+import com.es.phoneshop.service.implementations.DefaultCartService;
+import com.es.phoneshop.service.implementations.DefaultRecentlyViewedService;
 import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletContext;
@@ -96,7 +96,7 @@ public class ProductDetailsPageServletTest {
         servlet.doGet(request, response);
 
         verify(requestDispatcher).forward(request, response);
-        verify(request).setAttribute(eq("product"), eq(productDao.getProduct(PRODUCT_TEST_ID)));
+        verify(request).setAttribute(eq("product"), eq(productDao.get(PRODUCT_TEST_ID)));
         assertFalse(recentlyViewed.isEmpty());
     }
 
