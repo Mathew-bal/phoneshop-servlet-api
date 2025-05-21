@@ -1,5 +1,6 @@
 package com.es.phoneshop.utils.comparator;
 
+import com.es.phoneshop.enums.SearchMethod;
 import com.es.phoneshop.enums.SortBy;
 import com.es.phoneshop.enums.SortOrder;
 import com.es.phoneshop.model.product.Product;
@@ -12,8 +13,6 @@ import java.math.BigDecimal;
 import java.util.Currency;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 
@@ -26,7 +25,7 @@ public class ProductComparatorTest
 
     private ProductComparator productComparator;
 
-    private QueryMatcher queryMatcher = new DescriptionQueryMatcher(true);
+    private QueryMatcher queryMatcher = new DescriptionQueryMatcher(SearchMethod.ANY_WORD,true);
 
     @Test
     public void testNoTextQuery() {

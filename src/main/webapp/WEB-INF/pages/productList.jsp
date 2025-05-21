@@ -12,6 +12,9 @@
     <input name="searchQuery" placeholder="Search query here" value="${param.searchQuery}">
     <button>Search</button>
   </form>
+  <form method="get" action="${pageContext.servletContext.contextPath}/products/advancedsearch">
+      <button>Advanced Search</button>
+    </form>
   <c:if test="${not empty param.message}">
     <div class="success">
       ${param.message}
