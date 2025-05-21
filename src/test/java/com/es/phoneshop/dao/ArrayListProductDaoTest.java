@@ -2,6 +2,7 @@ package com.es.phoneshop.dao;
 
 import com.es.phoneshop.dao.implementations.ArrayListGenericDao;
 import com.es.phoneshop.dao.implementations.ArrayListProductDao;
+import com.es.phoneshop.enums.SearchMethod;
 import com.es.phoneshop.enums.SortBy;
 import com.es.phoneshop.enums.SortOrder;
 import com.es.phoneshop.exception.ProductNotFoundException;
@@ -148,6 +149,66 @@ public class ArrayListProductDaoTest {
 
         searchResults.forEach(product -> {
             assertTrue(product.getDescription().contains(keyWords.get(0)) || product.getDescription().contains(keyWords.get(1)));
+        });
+    }
+
+    @Test
+    public void testAdvancedEmptySearch() {
+        String searchQuery = "";
+        List<Product> searchResults = productDao.findProductsAdvanced(searchQuery, SearchMethod.ALL_WORDS,  SortBy.DESCRIPTION, SortOrder.ASC, null, null);
+
+        assertTrue(searchResults.isEmpty());
+    }
+
+    @Test
+    public void testAdvancedAllWords() {
+        String searchQuery = "Samsung S";
+        List<String> keyWords = new ArrayList<>(List.of(searchQuery.split(" ")));
+        List<Product> searchResults = productDao.findProductsAdvanced(searchQuery, SearchMethod.ALL_WORDS,  SortBy.DESCRIPTION, SortOrder.ASC, null, null);
+
+        searchResults.forEach(product -> {
+            assertTrue(product.getDescription().contains(keyWords.get(0)) && product.getDescription().contains(keyWords.get(1)));
+        });
+    }
+
+    @Test
+    public void testAdvancedAnyWord() {
+        String searchQuery = "Samsung S";
+        List<String> keyWords = new ArrayList<>(List.of(searchQuery.split(" ")));
+        List<Product> searchResults = productDao.findProductsAdvanced(searchQuery, SearchMethod.ALL_WORDS,  SortBy.DESCRIPTION, SortOrder.ASC, null, null);
+
+        searchResults.forEach(product -> {
+            assertTrue(product.getDescription().contains(keyWords.get(0)) || product.getDescription().contains(keyWords.get(1)));
+        });
+    }
+
+    @Test
+    public void testAdvancedAllWordsPriceRange() {
+        String searchQuery = "Samsung S";
+        BigDecimal minPrice = new BigDecimal(100);
+        BigDecimal maxPrice = new BigDecimal(200);
+        List<String> keyWords = new ArrayList<>(List.of(searchQuery.split(" ")));
+        List<Product> searchResults = productDao.findProductsAdvanced(searchQuery, SearchMethod.ALL_WORDS,  SortBy.DESCRIPTION, SortOrder.ASC, minPrice, maxPrice);
+
+        searchResults.forEach(product -> {
+            assertTrue(product.getDescription().contains(keyWords.get(0)) && product.getDescription().contains(keyWords.get(1)));
+            assertTrue(product.getPrice().compareTo(minPrice) >= 0);
+            assertTrue(product.getPrice().compareTo(maxPrice) <= 0);
+        });
+    }
+
+    @Test
+    public void testAdvancedAnyWordPriceRange() {
+        String searchQuery = "Samsung S";
+        BigDecimal minPrice = new BigDecimal(100);
+        BigDecimal maxPrice = new BigDecimal(200);
+        List<String> keyWords = new ArrayList<>(List.of(searchQuery.split(" ")));
+        List<Product> searchResults = productDao.findProductsAdvanced(searchQuery, SearchMethod.ALL_WORDS,  SortBy.DESCRIPTION, SortOrder.ASC, minPrice, maxPrice);
+
+        searchResults.forEach(product -> {
+            assertTrue(product.getDescription().contains(keyWords.get(0)) || product.getDescription().contains(keyWords.get(1)));
+            assertTrue(product.getPrice().compareTo(minPrice) >= 0);
+            assertTrue(product.getPrice().compareTo(maxPrice) <= 0);
         });
     }
 }

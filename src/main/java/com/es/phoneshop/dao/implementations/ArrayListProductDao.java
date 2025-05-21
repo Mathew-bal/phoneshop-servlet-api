@@ -1,5 +1,6 @@
 package com.es.phoneshop.dao.implementations;
 
+import com.es.phoneshop.enums.SearchMethod;
 import com.es.phoneshop.utils.comparators.ProductComparator;
 import com.es.phoneshop.dao.ProductDao;
 import com.es.phoneshop.enums.SortBy;
@@ -9,6 +10,7 @@ import com.es.phoneshop.model.product.Product;
 import com.es.phoneshop.querymatcher.DescriptionQueryMatcher;
 import com.es.phoneshop.querymatcher.QueryMatcher;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Currency;
@@ -51,7 +53,7 @@ public class ArrayListProductDao extends ArrayListGenericDao<Product> implements
     @Override
     public List<Product> findProducts(String searchQuery, SortBy sortBy, SortOrder sortOrder) {
         List<String> keyWords = List.of(Optional.ofNullable(searchQuery).orElse("").split(" "));
-        QueryMatcher queryMatcher = new DescriptionQueryMatcher(SEARCH_CASE_SENSITIVE);
+        QueryMatcher queryMatcher = new DescriptionQueryMatcher(SearchMethod.ANY_WORD, SEARCH_CASE_SENSITIVE);
         Comparator<Product> sortComparator = new ProductComparator(keyWords, sortBy, sortOrder, queryMatcher);
 
         return extendedReadWriteLock.readSafe(() -> {
@@ -60,6 +62,29 @@ public class ArrayListProductDao extends ArrayListGenericDao<Product> implements
                     filter(product -> Optional.ofNullable(searchQuery).orElse("").isBlank() || queryMatcher.calculateMatchValue(product, keyWords) > 0).
                     sorted(sortComparator).
                     collect(Collectors.toList());
+        });
+    }
+
+    @Override
+    public List<Product> findProductsAdvanced(String searchQuery, SearchMethod searchMethod, SortBy sortBy, SortOrder sortOrder,
+                                      BigDecimal minPrice, BigDecimal maxPrice) {
+        List<String> keyWords = List.of(Optional.ofNullable(searchQuery).orElse("").split(" "));
+        QueryMatcher queryMatcher = new DescriptionQueryMatcher(searchMethod, SEARCH_CASE_SENSITIVE);
+        Comparator<Product> sortComparator = new ProductComparator(keyWords, sortBy, sortOrder, queryMatcher);
+
+        return extendedReadWriteLock.readSafe(() -> {
+            if (searchQuery == null || searchQuery.isEmpty()) {
+                return new ArrayList<>();
+            }
+            else {
+                return items.stream().
+                        filter(this::filterHasPriceHasStock).
+                        filter(product -> Optional.ofNullable(searchQuery).orElse("").isBlank() || queryMatcher.calculateMatchValue(product, keyWords) > 0).
+                        filter(product -> ((minPrice == null || product.getPrice().compareTo(minPrice) >= 0)
+                                && (maxPrice == null || product.getPrice().compareTo(maxPrice) <= 0))).
+                        sorted(sortComparator).
+                        collect(Collectors.toList());
+            }
         });
     }
 
